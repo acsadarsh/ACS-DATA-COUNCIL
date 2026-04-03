@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACS Master Data Council - VIP</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- NEON BLUE & RED THEME --- */
+        :root {
+            --bg-color: #07090f; --panel-bg: #111522;
+            --neon-blue: #00f2fe; --neon-red: #ff0844;
+            --neon-green: #00ff87; --neon-purple: #9d00ff; --neon-gold: #f2c94c;
+            --text-main: #e0e6ed;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar { width: 280px; background-color: var(--panel-bg); border-right: 2px solid var(--neon-blue); display: flex; flex-direction: column; box-shadow: 2px 0 15px rgba(0, 242, 254, 0.2); z-index: 10; }
+        .brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(0, 242, 254, 0.3); }
+        .brand img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); margin-bottom: 10px; object-fit: cover; }
+        .brand h2 { color: var(--neon-blue); font-size: 22px; letter-spacing: 1px; text-shadow: 0 0 5px var(--neon-blue); }
+        .brand p { color: var(--neon-red); font-size: 12px; font-weight: bold; letter-spacing: 2px; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 15px 25px; font-size: 16px; font-weight: bold; color: #8b9bb4; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: rgba(0, 242, 254, 0.1); color: #fff; border-left-color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+
+        /* MAIN CONTENT */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { background-color: var(--panel-bg); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 254, 0.3); }
+        .header h1 { color: #fff; font-size: 22px; display: flex; align-items: center; gap: 15px; }
+        
+        /* UNIVERSAL SEARCH */
+        .global-search { flex: 1; max-width: 400px; margin: 0 20px; position: relative; }
+        .global-search input { width: 100%; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--neon-blue); background: #07090f; color: white; outline: none; transition: 0.3s; }
+        .global-search input:focus { box-shadow: 0 0 15px rgba(0,242,254,0.4); }
+
+        .admin-badge { background: linear-gradient(45deg, var(--neon-red), #ffb199); padding: 8px 15px; border-radius: 20px; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px var(--neon-red); }
+
+        /* SERVICE TABS */
+        .service-tabs { display: none; margin-bottom: 20px; gap: 15px; }
+        .tab-btn { background: var(--panel-bg); color: #8b9bb4; border: 1px solid #333; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; outline: none; transition: 0.3s; }
+        .tab-btn.active { background: rgba(0, 242, 254, 0.1); color: var(--neon-blue); border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 242, 254, 0.3); }
+
+        .content-area { padding: 30px; overflow-y: auto; flex: 1; position: relative; }
+        .data-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        
+        /* CARDS */
+        .data-card { background: var(--panel-bg); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; cursor: pointer; }
+        .data-card:hover { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); transform: translateY(-3px); }
+        .card-top { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
+        .card-top img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-blue); }
+        .card-info h3 { color: #fff; font-size: 18px; margin-bottom: 3px; }
+        .card-info p { color: #8b9bb4; font-size: 13px; }
+        
+        /* BADGES & BUTTONS */
+        .token-badge { background: rgba(157,0,255,0.2); color: var(--neon-purple); padding: 5px 10px; border-radius: 5px; font-weight: bold; font-family: monospace; }
+        .card-actions { display: flex; gap: 8px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .btn { flex: 1; padding: 8px; border: none; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
+        .btn-edit { background: rgba(242, 201, 76, 0.1); color: var(--neon-gold); border: 1px solid var(--neon-gold); }
+        .btn-edit:hover { background: var(--neon-gold); color: #000; box-shadow: 0 0 10px var(--neon-gold); }
+        .btn-delete { background: rgba(255, 8, 68, 0.1); color: var(--neon-red); border: 1px solid var(--neon-red); }
+        .btn-delete:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 10px var(--neon-red); }
+        .btn-done { background: rgba(0, 255, 135, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
+        .btn-wa { background: #25D366; color: white; flex: 0.5; }
+        .btn-call { background: #34b7f1; color: white; flex: 0.5; }
+
+        /* MODALS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--panel-bg); border: 2px solid var(--neon-blue); border-radius: 15px; width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,242,254,0.3); overflow: hidden; }
+        .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { color: var(--neon-blue); }
+        .modal-close { background: none; border: none; color: var(--neon-red); font-size: 24px; cursor: pointer; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        
+        /* MODAL FORMS */
+        .edit-group { margin-bottom: 15px; }
+        .edit-group label { display: block; color: #8b9bb4; margin-bottom: 5px; font-size: 14px; }
+        .edit-group input { width: 100%; padding: 10px; background: #07090f; border: 1px solid #333; color: white; border-radius: 5px; outline: none; }
+        .edit-group input:focus { border-color: var(--neon-blue); }
+
+        /* ACTIVITY GRIDS IN MODAL */
+        .activity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .activity-img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
+        .list-item { background: #07090f; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); }
+
+        .loading-text { color: var(--neon-blue); font-size: 18px; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand">
+            <img src="https://ibb.co/hFRHRQ97" alt="ACS Logo">
+            <h2>DATA COUNCIL</h2>
+            <p>SUPER ADMIN</p>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="loadSection('ANSHIKA')"><i class="fas fa-palette"></i> Artist Anshika</div>
+            <div class="nav-item" onclick="loadSection('POS')"><i class="fas fa-receipt"></i> ACS POS</div>
+            <div class="nav-item" onclick="loadSection('CHAT')"><i class="fas fa-comments"></i> ACS Chat</div>
+            <div class="nav-item" onclick="loadSection('SERVICE')"><i class="fas fa-tools"></i> ACS Services</div>
+            <div class="nav-item" onclick="loadSection('JCB')"><i class="fas fa-tractor"></i> ACS JCB Parts</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 id="current-section-title">Loading...</h1>
+            <div class="global-search">
+                <input type="text" id="globalSearch" placeholder="🔍 Search IDs, Names, Tokens..." onkeyup="filterData()">
+            </div>
+            <div class="admin-badge"><i class="fas fa-crown"></i> ACS VIP Access</div>
+        </div>
+
+        <div class="content-area">
+            <div class="service-tabs" id="serviceTabs">
+                <button class="tab-btn active" id="tab-pending" onclick="switchServiceTab('pending')">Pending Requests</button>
+                <button class="tab-btn" id="tab-done" onclick="switchServiceTab('done')">Completed (Done)</button>
+            </div>
+            <div id="app-content">
+                <div class="loading-text">Initializing Database Connections...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="mainModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modalTitle">Details</h2>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-header" id="modalFooter" style="border-top: 1px solid rgba(255,255,255,0.1); border-bottom:none;">
+                </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, get, remove, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // FIREBASE CONFIGURATIONS
+        const appAnshika = initializeApp({ apiKey: "AIzaSyA-pstSQBFBTJpPJ78Lrdf5RSrzXB9JP3Y", projectId: "anshika-art-app-c3098" }, "ANSHIKA");
+        const dbAnshika = getFirestore(appAnshika);
+
+        const appPOS = initializeApp({ apiKey: "AIzaSyCsoHqAZOZ6b1K2KFW6DwaT42Pw_tVEKZA", databaseURL: "https://acs-pos-default-rtdb.firebaseio.com", projectId: "acs-pos" }, "POS");
+        const dbPOS = getDatabase(appPOS);
+
+        const appChat = initializeApp({ apiKey: "AIzaSyCD88ZYx46bkgAPM2g5aC7iTyBxVuOsGzg", databaseURL: "https://acs-chat-b36aa-default-rtdb.firebaseio.com", projectId: "acs-chat-b36aa" }, "CHAT");
+        const dbChat = getDatabase(appChat);
+
+        const appService = initializeApp({ apiKey: "AIzaSyDb0r-Gb77EeVwIFXXu6SKLvAeJK0wNUYA", projectId: "acs-service-56f2b" }, "SERVICE");
+        const dbService = getFirestore(appService);
+
+        // CACHING DATA FOR SPEED
+        let cachedData = { ANSHIKA: {}, POS: {}, CHAT: {}, SERVICE: [] };
+        let currentSection = 'ANSHIKA';
+        let currentServiceTab = 'pending';
+
+        const contentDiv = document.getElementById('app-content');
+
+        window.loadSection = async function(section) {
+            currentSection = section;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('globalSearch').value = '';
+            document.getElementById('serviceTabs').style.display = (section === 'SERVICE') ? 'flex' : 'none';
+            contentDiv.innerHTML = '<div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Fetching Fast Data...</div>';
+
+            if(section === 'ANSHIKA') { document.getElementById('current-section-title').innerText = "Colour Artist Anshika"; await renderAnshika(); }
+            else if (section === 'POS') { document.getElementById('current-section-title').innerText = "ACS POS Console"; await renderPOS(); }
+            else if (section === 'CHAT') { document.getElementById('current-section-title').innerText = "ACS Chat Console"; await renderChat(); }
+            else if (section === 'SERVICE') { document.getElementById('current-section-title').innerText = "ACS Service Bookings"; await renderService(); }
+            else { contentDiv.innerHTML = `<h2 style="text-align:center; margin-top:50px;">Database Not Connected Yet</h2>`; }
+        }
+
+        // --- 1. ANSHIKA LOGIC ---
+        async function renderAnshika() {
+            try {
+                const snap = await getDocs(collection(dbAnshika, "users"));
+                let html = '<div class="data-grid">';
+                snap.forEach(d => { 
+                    cachedData.ANSHIKA[d.id] = d.data(); 
+                    let u = d.data();
+                    html += `
+                    <div class="data-card searchable" data-search="${u.username} ${u.name}" onclick="viewActivity('ANSHIKA', '${d.id}')">
+                        <div class="card-top">
+                            <img src="${u.profilePic || 'https://via.placeholder.com/60'}">
+                            <div class="card-info"><h3>${u.name}</h3><p>@${u.username} | Pass: ${u.password}</p></div>
+                        </div>
+                        <div class="card-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-edit" onclick="openEdit('ANSHIKA', '${d.id}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-delete" onclick="deleteRecord('ANSHIKA', '${d.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                });
+                contentDiv.innerHTML = html + '</div>';
+            } catch(e) { contentDiv.innerHTML = "Error: " + e; }
+        }
+
+        // --- 2. POS LOGIC ---
+        async function renderPOS() {
+            try {
+                const snap = await get(child(ref(dbPOS), 'users'));
+                if(snap.exists()) {
+                    let html = '<div class="data-grid">';
+                    let users = snap.val();
+                    for(let mobile in users) {
+                        cachedData.POS[mobile] = users[mobile];
+                        let u = users[mobile];
+                        html += `
+                        <div class="data-card searchable" data-search="${mobile} ${u.name} ${u.shopName}" onclick="viewActivity('POS', '${mobile}')">
+                            <div class="card-top">
+                                <img src="${u.profilePic || 'https://via.placeholder.com/60'}">
+                                <div class="card-info"><h3>${u.shopName}</h3><p>${u.name} | Mob: ${mobile}</p></div>
+                            </div>
+                            <div class="card-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-edit" onclick="openEdit('POS', '${mobile}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn btn-delete" onclick="deleteRecord('POS', '${mobile}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                    }
+                    contentDiv.innerHTML = html + '</div>';
+                }
+            } catch(e) { contentDiv.innerHTML = "Error: " + e; }
+        }
+
+        // --- 3. CHAT LOGIC ---
+        async function renderChat() {
+            try {
+                const snap = await get(child(ref(dbChat), 'users'));
+                if(snap.exists()) {
+                    let html = '<div class="data-grid">';
+                    let users = snap.val();
+                    for(let un in users) {
+                        cachedData.CHAT[un] = users[un];
+                        let u = users[un];
+                        html += `
+                        <div class="data-card searchable" data-search="${un} ${u.name}" onclick="viewActivity('CHAT', '${un}')">
+                            <div class="card-top">
+                                <img src="${u.dp || 'https://via.placeholder.com/60'}">
+                                <div class="card-info"><h3>${u.name}</h3><p>@${un} | Pass: ${u.pass}</p></div>
+                            </div>
+                            <div class="card-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-edit" onclick="openEdit('CHAT', '${un}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn btn-delete" onclick="deleteRecord('CHAT', '${un}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                    }
+                    contentDiv.innerHTML = html + '</div>';
+                }
+            } catch(e) { contentDiv.innerHTML = "Error: " + e; }
+        }
+
+        // --- 4. SERVICE LOGIC ---
+        window.switchServiceTab = function(tab) {
+            currentServiceTab = tab;
+            document.getElementById('tab-pending').classList.remove('active');
+            document.getElementById('tab-done').classList.remove('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            renderServiceUI();
+        }
+
+        async function renderService() {
+            try {
+                const q = query(collection(dbService, "service_requests"), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+                cachedData.SERVICE = [];
+                snap.forEach(d => { cachedData.SERVICE.push({id: d.id, ...d.data()}); });
+                renderServiceUI();
+            } catch(e) { contentDiv.innerHTML = "Error: " + e; }
+        }
+
+        function renderServiceUI() {
+            let html = '<div class="data-grid">';
+            cachedData.SERVICE.forEach(s => {
+                let status = s.status || 'pending';
+                if(status !== currentServiceTab) return; // Filter based on tab
+
+                let dateObj = s.timestamp ? s.timestamp.toDate() : new Date();
+                let timeStr = dateObj.toLocaleDateString('en-IN') + " " + dateObj.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
+                
+                let btnHtml = status === 'pending' 
+                    ? `<button class="btn btn-done" onclick="markServiceDone('${s.id}')"><i class="fas fa-check"></i> Mark Done</button>` 
+                    : `<button class="btn btn-delete" onclick="deleteRecord('SERVICE', '${s.id}')"><i class="fas fa-trash"></i> Delete Data</button>`;
+
+                html += `
+                <div class="data-card searchable" data-search="${s.token} ${s.name} ${s.mobile}">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span class="token-badge">${s.token}</span>
+                        <span style="color:#8b9bb4; font-size:12px;">${timeStr}</span>
+                    </div>
+                    <h3 style="color:#fff; margin-bottom:5px;">${s.name}</h3>
+                    <p style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px;">${s.service}</p>
+                    <p style="color:#8b9bb4; font-size:13px; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px;">${s.description}</p>
+                    
+                    <div class="card-actions">
+                        ${btnHtml}
+                        <a href="tel:${s.mobile}" class="btn btn-call"><i class="fas fa-phone"></i></a>
+                        <a href="https://wa.me/91${s.mobile}" target="_blank" class="btn btn-wa"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>`;
+            });
+            contentDiv.innerHTML = html + '</div>';
+        }
+
+        // --- GLOBAL ACTIONS (DELETE, EDIT, SEARCH, MARK DONE) ---
+        window.filterData = function() {
+            let val = document.getElementById('globalSearch').value.toLowerCase();
+            document.querySelectorAll('.searchable').forEach(card => {
+                let text = card.getAttribute('data-search').toLowerCase();
+                card.style.display = text.includes(val) ? '' : 'none';
+            });
+        }
+
+        window.deleteRecord = async function(section, id) {
+            if(!confirm(`Are you sure you want to permanently delete this ID: ${id}?`)) return;
+            try {
+                if(section === 'ANSHIKA') await deleteDoc(doc(dbAnshika, "users", id));
+                if(section === 'SERVICE') await deleteDoc(doc(dbService, "service_requests", id));
+                if(section === 'POS') await remove(ref(dbPOS, 'users/' + id));
+                if(section === 'CHAT') await remove(ref(dbChat, 'users/' + id));
+                alert('Deleted Successfully!');
+                loadSection(section); // Refresh UI
+            } catch(e) { alert("Error deleting: " + e); }
+        }
+
+        window.markServiceDone = async function(id) {
+            if(!confirm("Mark this service as Completed?")) return;
+            try {
+                await updateDoc(doc(dbService, "service_requests", id), { status: 'done' });
+                alert('Marked as Done!');
+                loadSection('SERVICE'); // Refresh
+            } catch(e) { alert("Error: " + e); }
+        }
+
+        // --- UNIVERSAL MODAL SYSTEM ---
+        const modal = document.getElementById('mainModal');
+        const mTitle = document.getElementById('modalTitle');
+        const mBody = document.getElementById('modalBody');
+        const mFooter = document.getElementById('modalFooter');
+
+        window.closeModal = function() { modal.style.display = 'none'; }
+
+        // EDIT LOGIC
+        window.openEdit = function(section, id) {
+            let data = cachedData[section][id];
+            mTitle.innerText = "Edit " + section + " User: " + id;
+            mFooter.innerHTML = `<button class="btn btn-done" onclick="saveEdit('${section}', '${id}')" style="width:100%; padding:12px; font-size:16px;">Save Changes</button>`;
+            
+            let html = "";
+            if(section === 'ANSHIKA') {
+                html = `
+                <div class="edit-group"><label>Name</label><input type="text" id="e_name" value="${data.name}"></div>
+                <div class="edit-group"><label>Password</label><input type="text" id="e_pass" value="${data.password}"></div>
+                <div class="edit-group"><label>Security Answer</label><input type="text" id="e_ans" value="${data.answer}"></div>`;
+            } else if (section === 'POS') {
+                html = `
+                <div class="edit-group"><label>Owner Name</label><input type="text" id="e_name" value="${data.name}"></div>
+                <div class="edit-group"><label>Shop Name</label><input type="text" id="e_shop" value="${data.shopName}"></div>
+                <div class="edit-group"><label>Password</label><input type="text" id="e_pass" value="${data.pass}"></div>`;
+            } else if (section === 'CHAT') {
+                html = `
+                <div class="edit-group"><label>Name</label><input type="text" id="e_name" value="${data.name}"></div>
+                <div class="edit-group"><label>Password</label><input type="text" id="e_pass" value="${data.pass}"></div>
+                <div class="edit-group"><label>Security Answer</label><input type="text" id="e_ans" value="${data.ans}"></div>`;
+            }
+            mBody.innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        window.saveEdit = async function(section, id) {
+            try {
+                if(section === 'ANSHIKA') {
+                    await updateDoc(doc(dbAnshika, "users", id), {
+                        name: document.getElementById('e_name').value, password: document.getElementById('e_pass').value, answer: document.getElementById('e_ans').value
+                    });
+                } else if(section === 'POS') {
+                    await update(ref(dbPOS, 'users/' + id), {
+                        name: document.getElementById('e_name').value, shopName: document.getElementById('e_shop').value, pass: document.getElementById('e_pass').value
+                    });
+                } else if(section === 'CHAT') {
+                    await update(ref(dbChat, 'users/' + id), {
+                        name: document.getElementById('e_name').value, pass: document.getElementById('e_pass').value, ans: document.getElementById('e_ans').value
+                    });
+                }
+                alert('Updated successfully!'); closeModal(); loadSection(section);
+            } catch(e) { alert("Update Error: " + e); }
+        }
+
+        // VIEW ACTIVITY LOGIC
+        window.viewActivity = async function(section, id) {
+            mTitle.innerText = "User Activity: " + id;
+            mBody.innerHTML = "<h3 style='text-align:center; color:var(--neon-blue);'>Fetching User Data...</h3>";
+            mFooter.innerHTML = "";
+            modal.style.display = 'flex';
+
+            let html = "";
+            try {
+                if(section === 'ANSHIKA') {
+                    const q = query(collection(dbAnshika, "arts"), where("ownerID", "==", id));
+                    const snap = await getDocs(q);
+                    html = `<h3 style="color:white; margin-bottom:15px;">Uploaded Arts</h3><div class="activity-grid">`;
+                    if(snap.empty) html += "<p>No arts uploaded.</p>";
+                    snap.forEach(d => { html += `<img src="${d.data().images[0]}" class="activity-img">`; });
+                    html += `</div>`;
+                } 
+                else if (section === 'POS') {
+                    const billsSnap = await get(child(ref(dbPOS), 'bills/' + id));
+                    html = `<h3 style="color:white; margin-bottom:10px;">Recent Bills History</h3>`;
+                    if(!billsSnap.exists()) html += "<p>No bills found.</p>";
+                    else {
+                        let bills = billsSnap.val();
+                        Object.keys(bills).reverse().slice(0, 10).forEach(k => {
+                            let b = bills[k];
+                            html += `<div class="list-item"><b>${b.customer}</b><br><small style="color:#aaa;">Date: ${b.date} | Total: ₹${b.total} | Via: ${b.payMode}</small></div>`;
+                        });
+                    }
+                }
+                else if (section === 'CHAT') {
+                    const chatsSnap = await get(child(ref(dbChat), 'chats'));
+                    html = `<h3 style="color:white; margin-bottom:10px;">Chat History Overview</h3>`;
+                    if(chatsSnap.exists()) {
+                        let allChats = chatsSnap.val();
+                        let found = false;
+                        for(let room in allChats) {
+                            if(room.includes(id)) {
+                                found = true;
+                                html += `<h4 style="color:var(--neon-gold); margin-top:10px;">Room: ${room}</h4><div style="background:#07090f; padding:10px; border-radius:5px; max-height:150px; overflow-y:auto;">`;
+                                let msgs = allChats[room];
+                                for(let mk in msgs) {
+                                    let m = msgs[mk];
+                                    let msgText = m.type==='image'?'[Photo sent]':(m.type==='audio'?'[Audio sent]':m.text);
+                                    html += `<p style="font-size:12px; margin-bottom:5px; color:${m.from===id?'var(--neon-green)':'#fff'};"><b>${m.from}:</b> ${msgText}</p>`;
+                                }
+                                html += `</div>`;
+                            }
+                        }
+                        if(!found) html += "<p>No chat history.</p>";
+                    } else html += "<p>No chats globally.</p>";
+                }
+                mBody.innerHTML = html;
+            } catch(e) { mBody.innerHTML = "Error fetching activity: " + e; }
+        }
+
+        // Init App
+        setTimeout(() => loadSection('ANSHIKA'), 500);
+
+    </script>
+</body>
+</html>
